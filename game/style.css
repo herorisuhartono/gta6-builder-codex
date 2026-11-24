@@ -1,0 +1,37 @@
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; min-height: 100vh; overflow: hidden; color: #fff3df; background: #29203f; font: 15px system-ui, sans-serif; }
+#scene { position: fixed; width: 100vw; height: 100vh; display: block; }
+#hud { position: fixed; inset: 0; pointer-events: none; padding: 26px; text-shadow: 0 1px 4px #160e28; }
+header, #job, #stats, #telemetry { display: grid; gap: 4px; }
+header span, small, .eyebrow { font-size: 10px; font-weight: 800; letter-spacing: .22em; color: #ffd596; }
+header strong { font-size: 23px; letter-spacing: -.04em; }
+#stats { position: absolute; top: 26px; right: 26px; text-align: right; }
+#stats strong { font-size: 24px; }
+#stars { color: #ffca7b; letter-spacing: .18em; font-size: 22px; }
+#job { margin-top: 20px; width: fit-content; max-width: 350px; padding: 12px 14px; border-left: 3px solid #ff996e; background: #201732ce; }
+#job strong { font-size: 18px; }
+#objective { color: #fff2e1; }
+#notice { position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%); width: max-content; max-width: 70%; text-align: center; padding: 9px 14px; background: #201732e8; border-bottom: 2px solid #ff996e; }
+#notice:empty { display: none; }
+footer { position: absolute; bottom: 26px; left: 26px; display: flex; gap: 13px; align-items: end; }
+#radar { width: 150px; height: 150px; border: 2px solid #ffd596aa; border-radius: 50%; background: #291e3cee; }
+#telemetry { padding: 8px 12px; background: #201732df; }
+#speed { font-size: 19px; }
+#hint { font-size: 12px; }
+progress { width: 120px; height: 7px; accent-color: #76efcf; }
+#menu { position: fixed; inset: 0; display: grid; align-items: center; padding: 5vw; background: linear-gradient(90deg,#20132bf5,#231631bc 38%,transparent 83%); }
+.menu-content { max-width: 480px; }
+h1 { font: 1000 clamp(64px,11vw,150px)/.76 Impact,'Arial Black',sans-serif; letter-spacing: -.055em; margin: 22px 0 14px; }
+h1 i { color: #ff9878; }
+h2 { color: #ffb17d; font-size: 21px; letter-spacing: .42em; margin: 0; }
+.menu-content p { max-width: 385px; line-height: 1.5; }
+button { color: #21152c; background: #ffd596; padding: 12px 16px; border: 0; font: inherit; font-weight: 850; cursor: pointer; margin-right: 5px; }
+button span { margin-left: 12px; }
+button:hover, button:focus-visible { background: #fff5de; }
+.keys { color: #f4d6d0; font-size: 11px; }
+body {
+  background:
+    radial-gradient(circle at 77% 35%,#fff5cd 0 3.5vh,#ffd2a96e 3.7vh,transparent 12vh),
+    linear-gradient(178deg,#574571,#966181 27%,#e88688 42%,#f6a689 54%,#ca7a8c 69%);
+}

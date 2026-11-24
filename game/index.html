@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Marrow Bay | Low Tide</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<canvas id="scene" aria-label="Third-person view of Marrow Bay"></canvas>
+<div id="hud" hidden>
+  <header><span>MARROW BAY</span><strong id="district"></strong></header>
+  <aside id="stats"><div id="stars"></div><strong id="cash"></strong><small id="score"></small></aside>
+  <section id="job"><small>ACTIVE CONTRACT</small><strong id="title"></strong><span id="objective"></span></section>
+  <div id="notice" role="status"></div>
+  <footer><canvas id="radar" width="180" height="180" aria-label="Street radar"></canvas><div id="telemetry"><strong id="speed"></strong><span id="hint"></span><progress id="health" max="100" value="100" aria-label="Health"></progress></div></footer>
+</div>
+<main id="menu">
+  <div class="menu-content">
+    <p class="eyebrow">SUNCOAST / 1989</p>
+    <h1>MARROW<br>BAY<i>.</i></h1>
+    <h2>LOW TIDE</h2>
+    <p>The seawall is failing. Port boss Lennox Vale has the repair money. Dock dispatcher Inez Sol needs someone to get the ledger off the waterfront.</p>
+    <button id="start">Start shift <span>↗</span></button>
+    <button id="resume" hidden>Continue shift <span>↗</span></button>
+    <p class="keys">WASD move / drive · Shift sprint / nitro · Space jump / drift<br>E or F enter / exit · Mouse aim · Click pulse · Esc pause</p>
+  </div>
+</main>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
