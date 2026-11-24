@@ -1,6 +1,7 @@
 import {clearSpace,spawn} from './world.js';
 import {angleDelta,carModels,createTraffic,distance,roadSight,tickPolice,tickTraffic} from './traffic.js';
 import {tickContracts} from './contracts.js';
+import {hospital,tickCombat} from './combat.js';
 
 const saveKey='marrow-bay.shift.v1';
 const saveFields=['chapter','cash','score'];
@@ -21,7 +22,9 @@ export function createShift(saved=null) {
     ...createTraffic(),player:{...spawn,y:0,vy:0,health:100},vehicle:null,
     police:[],cash:saved?.cash||0,score:saved?.score||0,chapter:saved?.chapter||0,
     wanted:0,heatTime:0,dispatch:0,collision:0,message:'',messageTime:0,
-    race:false,gate:0,clock:0,age:0,pulse:0,shot:null
+    race:false,gate:0,clock:0,age:0,cameraKick:0,
+    weapon:0,ammo:96,muzzle:0,shotCooldown:0,reportAt:0,hitReportAt:0,
+    bullets:[],sparks:[],officers:[],pickups:[],chopper:null,wasted:0
   };
 }
 
@@ -55,13 +58,17 @@ function walk(state,city,input,dt) {
   const front=Number(input.down('KeyW'))-Number(input.down('KeyS'));
   const side=Number(input.down('KeyD'))-Number(input.down('KeyA'));
   if(front||side){
-    const heading=input.yaw+Math.atan2(side,front);
+    const heading=(input.cameraYaw??input.yaw)+Math.atan2(side,front);
     const speed=input.shift()?9.6:5.2;
     p.yaw+=angleDelta(p.yaw,heading)*Math.min(1,dt*15);
     const x=p.x+Math.sin(heading)*speed*dt,z=p.z+Math.cos(heading)*speed*dt;
     if(clearSpace(city,x,p.z,.48)) p.x=x;
     if(clearSpace(city,p.x,z,.48)) p.z=z;
   }
+  const speedTarget=front||side?(input.shift()?1:.58):0;
+  p.walkBlend=(p.walkBlend||0)+(speedTarget-(p.walkBlend||0))*Math.min(1,dt*10);
+  p.gait=(p.gait||0)+dt*11*p.walkBlend;
+  p.lean=(p.lean||0)+((speedTarget===1&&!input.aim?.()?.075:0)-(p.lean||0))*Math.min(1,dt*9);
   if(input.take('Space')&&p.y===0) p.vy=6.8;
   p.y=Math.max(0,p.y+p.vy*dt);
   p.vy=p.y>0||p.vy>0?p.vy-18*dt:0;
@@ -90,6 +97,7 @@ function drive(state,city,input,dt,services) {
     if(Math.abs(car.speed)>5&&state.collision<=0){
       state.collision=1.4;
       state.player.health-=hit?5:3;
+      state.cameraKick=Math.min(.22,Math.abs(car.speed)*.009);
       services.sound('hit');
       if(hit) services.offense(1,'Collision reported.');
     }
@@ -114,31 +122,23 @@ function drive(state,city,input,dt,services) {
     }
   }
   if(!car.ramp){
+    const airborne=car.y>0;
     car.y=Math.max(0,car.y+car.vy*dt);
+    if(airborne&&car.y===0&&car.vy<-4) state.cameraKick=.13;
     car.vy=car.y>0||car.vy>0?car.vy-18*dt:0;
   }
   if(drift&&Math.abs(car.speed)>13&&steering) state.score+=Math.floor(Math.abs(car.speed)/12);
 }
 
-function fire(state,input,services) {
-  if(!input.take('Fire')||state.vehicle||state.pulse>0) return;
-  state.pulse=.4;
-  const p=state.player;
-  p.yaw=input.yaw;
-  const targets=[...state.police,...state.pedestrians];
-  const hit=targets.filter(entity=>distance(p,entity)<38&&Math.abs(angleDelta(p.yaw,Math.atan2(entity.x-p.x,entity.z-p.z)))<.125)
-    .sort((a,b)=>distance(a,p)-distance(b,p))[0];
-  const range=hit?distance(p,hit):28;
-  state.shot={x:p.x,z:p.z,y:p.y+1.2,yaw:p.yaw,range};
-  if(hit){hit.stun=hit.police?7:4;state.score+=hit.police?100:20;}
-  services.offense(1,hit?.police?'Patrol disabled.':'Pulse discharge reported.');
-  services.sound('pulse');
-}
 
 export function tickShift(state,city,input,dt,sound) {
   state.age+=dt;
   state.collision-=dt;
-  state.pulse-=dt;
+  if(state.wasted>0){
+    state.wasted=Math.max(0,state.wasted-dt);
+    if(state.wasted===0) Object.assign(state.player,{...hospital,y:0,vy:0,health:100,walkBlend:0,gait:0,lean:0,aiming:false});
+    return;
+  }
   state.messageTime-=dt;
   const notify=(message)=>{state.message=message;state.messageTime=5.6;};
   const offense=(level,message)=>{
@@ -150,9 +150,9 @@ export function tickShift(state,city,input,dt,sound) {
   if(input.take('KeyE')||input.take('KeyF')) switchVehicle(state,city,notify,offense);
   if(state.vehicle) drive(state,city,input,dt,services);
   else walk(state,city,input,dt);
-  fire(state,input,services);
   tickTraffic(state,dt);
   tickPolice(state,city,dt);
+  tickCombat(state,city,input,dt,services);
   const player=state.vehicle||state.player;
   if(state.wanted&&state.police.every(car=>distance(car,player)>34||car.stun>0||!roadSight(city,car,player))){
     state.heatTime-=dt;
@@ -164,13 +164,18 @@ export function tickShift(state,city,input,dt,sound) {
   }
   if(state.player.health<=0){
     state.vehicle=null;
-    Object.assign(state.player,{...spawn,health:100,y:0,vy:0});
+    state.player.health=0;
+    state.wasted=2.5;
     state.cash=Math.max(0,state.cash-100);
     state.wanted=0;
     state.police.length=0;
     state.race=false;
-    notify('Back at the promenade / booking fee up to $100');
+    state.officers=[];
+    state.bullets=[];
+    state.chopper=null;
+    notify('Discharged at Mercy Hospital / fee up to $100');
     saveShift(state);
+    return;
   } else if(!state.wanted) state.player.health=Math.min(100,state.player.health+4*dt);
   tickContracts(state,dt,services);
 }

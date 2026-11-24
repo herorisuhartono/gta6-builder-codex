@@ -1,6 +1,7 @@
 import {avenues,streets,districtAt} from './world.js';
 import {carModels,distance} from './traffic.js';
 import {contracts,objectiveFor,raceGates} from './contracts.js';
+import {weapons} from './combat.js';
 
 const byId=(id)=>document.getElementById(id);
 const radar=byId('radar').getContext('2d');
@@ -37,6 +38,20 @@ function drawRadar(state,point,objective) {
   }
   for(const vehicle of state.cars) dot(vehicle,'#a9c1ce',1.9);
   for(const officer of state.police) dot(officer,Math.floor(state.age*6)%2?'#ff6388':'#77d9ff',3.3);
+  for(const officer of state.officers) if(officer.health>0) dot(officer,'#ff6388',2.4);
+  if(state.chopper){
+    const air=state.chopper;
+    const factor=Math.min(1,112/Math.max(1,Math.hypot(air.x-point.x,air.z-point.z)));
+    const px=x(point.x+(air.x-point.x)*factor),pz=z(point.z+(air.z-point.z)*factor);
+    radar.save();
+    radar.translate(px,pz);
+    radar.rotate(-air.yaw);
+    radar.fillStyle='#86eeff';
+    radar.fillRect(-2,-3,4,7);
+    radar.fillRect(-6,-1,12,2);
+    radar.fillRect(-1,4,2,4);
+    radar.restore();
+  }
   const dx=objective.x-point.x,dz=objective.z-point.z;
   const factor=Math.min(1,117/Math.max(1,Math.hypot(dx,dz)));
   dot({x:point.x+dx*factor,z:point.z+dz*factor},'#ffcb76',4.6);
@@ -70,7 +85,11 @@ export function drawHud(state) {
   byId('objective').textContent=text+'  ·  '+meters+' m';
   byId('notice').textContent=state.messageTime>0?state.message:'';
   byId('speed').textContent=state.vehicle?String(Math.round(Math.abs(state.vehicle.speed)*3.6)).padStart(2,'0')+' km/h':'ON FOOT';
-  byId('hint').textContent=state.vehicle?carModels[state.vehicle.model].name+' · N₂O '+Math.round(state.vehicle.nitro*100)+'%':'E / F vehicle · click to aim';
+  byId('hint').textContent=state.vehicle?carModels[state.vehicle.model].name+' · N₂O '+Math.round(state.vehicle.nitro*100)+'% · V view':'E / F vehicle · RMB aim';
   byId('health').value=state.player.health;
+  byId('health-label').textContent=Math.round(state.player.health)+' HP';
+  byId('weapon').textContent=weapons[state.weapon].name+(state.weapon===1?' · '+state.ammo:'');
+  byId('reticle').hidden=!state.player.aiming||!!state.vehicle||state.wasted>0;
+  byId('wasted').hidden=state.wasted===0;
   drawRadar(state,point,target);
 }

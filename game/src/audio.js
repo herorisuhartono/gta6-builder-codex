@@ -1,5 +1,5 @@
 export function createSound() {
-  let context,oscillator,engine,siren,alarm;
+  let context,oscillator,engine,siren,alarm,rotor,rotorGain;
   function start() {
     if(!context){
       context=new AudioContext();
@@ -14,13 +14,14 @@ export function createSound() {
       }
       [oscillator,engine]=loop('triangle',45);
       [siren,alarm]=loop('sine',610);
+      [rotor,rotorGain]=loop('square',31);
     }
     if(context.state==='suspended') context.resume().catch(()=>{});
   }
 
   function effect(kind) {
     if(!context) return;
-    const tones={hit:[92,35,.18,'sawtooth'],gate:[430,790,.27,'triangle'],pulse:[850,95,.21,'triangle']};
+    const tones={hit:[92,35,.18,'sawtooth'],gate:[430,790,.27,'triangle'],pulse:[210,45,.13,'sawtooth'],hostile:[138,40,.12,'square']};
     const [from,to,length,type]=tones[kind];
     const tone=context.createOscillator(), volume=context.createGain(), now=context.currentTime;
     tone.type=type;
@@ -42,6 +43,8 @@ export function createSound() {
     const t=context.currentTime;
     oscillator.frequency.setTargetAtTime(36+speed*3.5,t,.08);
     engine.gain.setTargetAtTime(playing&&state.vehicle?.speed!==undefined?.027+speed*.0007:0,t,.1);
+    rotor.frequency.setTargetAtTime(30+Math.sin(t*19)*3,t,.03);
+    rotorGain.gain.setTargetAtTime(playing&&state.chopper?.009:0,t,.15);
     siren.frequency.setTargetAtTime(620+Math.sin(t*6)*180,t,.025);
     alarm.gain.setTargetAtTime(playing?Math.max(0,1-near/115)*.045:0,t,.09);
   }

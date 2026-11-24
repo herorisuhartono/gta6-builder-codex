@@ -19,6 +19,9 @@ footer { position: absolute; bottom: 26px; left: 26px; display: flex; gap: 13px;
 #telemetry { padding: 8px 12px; background: #201732df; }
 #speed { font-size: 19px; }
 #hint { font-size: 12px; }
+#weapon, #health-label { font-size: 12px; color: #ffdda9; }
+#reticle { position: absolute; top: 50%; left: 50%; translate: -50% -50%; width: 13px; height: 13px; border: 1px solid #ffe7b3; border-radius: 50%; box-shadow: 0 0 3px #21152c; }
+#wasted { position: absolute; inset: 0; display: grid; place-items: center; background: #290b22a8; color: #ff6e87; font: 900 clamp(45px,10vw,126px)/1 Impact, sans-serif; letter-spacing: .08em; }
 progress { width: 120px; height: 7px; accent-color: #76efcf; }
 #menu { position: fixed; inset: 0; display: grid; align-items: center; padding: 5vw; background: linear-gradient(90deg,#20132bf5,#231631bc 38%,transparent 83%); }
 .menu-content { max-width: 480px; }

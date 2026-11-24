@@ -14,7 +14,9 @@
   <aside id="stats"><div id="stars"></div><strong id="cash"></strong><small id="score"></small></aside>
   <section id="job"><small>ACTIVE CONTRACT</small><strong id="title"></strong><span id="objective"></span></section>
   <div id="notice" role="status"></div>
-  <footer><canvas id="radar" width="180" height="180" aria-label="Street radar"></canvas><div id="telemetry"><strong id="speed"></strong><span id="hint"></span><progress id="health" max="100" value="100" aria-label="Health"></progress></div></footer>
+  <div id="reticle" hidden aria-hidden="true"></div>
+  <strong id="wasted" hidden role="status">WASTED</strong>
+  <footer><canvas id="radar" width="180" height="180" aria-label="Street radar"></canvas><div id="telemetry"><strong id="speed"></strong><span id="hint"></span><span id="weapon"></span><span id="health-label">100 HP</span><progress id="health" max="100" value="100" aria-label="Health"></progress></div></footer>
 </div>
 <main id="menu">
   <div class="menu-content">
@@ -24,7 +26,7 @@
     <p>The seawall is failing. Port boss Lennox Vale has the repair money. Dock dispatcher Inez Sol needs someone to get the ledger off the waterfront.</p>
     <button id="start">Start shift <span>↗</span></button>
     <button id="resume" hidden>Continue shift <span>↗</span></button>
-    <p class="keys">WASD move / drive · Shift sprint / nitro · Space jump / drift<br>E or F enter / exit · Mouse aim · Click pulse · Esc pause</p>
+    <p class="keys">WASD move / drive · Shift sprint / nitro · Space jump / drift<br>E or F enter / exit · RMB aim · LMB fire · 1 / 2 weapon · V chase view · Esc pause</p>
   </div>
 </main>
 <script type="module" src="./src/main.js"></script>

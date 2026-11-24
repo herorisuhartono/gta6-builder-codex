@@ -63,7 +63,7 @@ function building(mesh,obstacles,x,z,w,d,h,color,hotel) {
   mesh.box(x,h/2,z,w,h,d,color);
   mesh.box(x,h+.42,z,w+.5,.84,d+.5,rim);
   mesh.box(x,h+1.4,z,w*.66,2,d*.75,color);
-  obstacles.push({x,z,w,d});
+  obstacles.push({x,z,w,d,h:h+2.4});
   for(let y=3.8;y<h-1;y+=hotel?3.7:4.5){
     const lit=rgb((Math.round(y)+Math.round(z))%3?'ffdba2':'544b76');
     if(hotel){
@@ -165,7 +165,7 @@ export function createCity() {
     if(Math.abs(x-75)<9||Math.abs(x)<8) continue;
     const color=colors[i%7];
     mesh.box(x,1.55,z,10,3.1,4.5,color);
-    obstacles.push({x,z,w:10,d:4.5});
+    obstacles.push({x,z,w:10,d:4.5,h:i%4===0?6.2:3.1});
     if(i%4===0) mesh.box(x,4.65,z,10,3.1,4.5,color);
     for(let j=-4;j<=4;j++){
       const seam=color.map(channel=>channel*.72);
@@ -185,6 +185,14 @@ export function createCity() {
     mesh.quad(a,b,c,d,rgb('ad7768'));
     for(const offset of [-2.75,2.75]) mesh.quad([x+offset-.1,.08,z-4],[x+offset+.1,.08,z-4],[x+offset+.1,2.51,z+4],[x+offset-.1,2.51,z+4],gold);
   }
+  const clinicX=-123,clinicZ=-138;
+  mesh.box(clinicX,4.5,clinicZ,21,9,12,rgb('beb3b3'));
+  mesh.box(clinicX,9.31,clinicZ,22,.52,13,white);
+  mesh.box(clinicX,1.55,clinicZ-6.08,3.4,3.1,.2,deep);
+  mesh.box(clinicX-5,5.2,clinicZ-6.08,.5,2,.22,pink);
+  mesh.box(clinicX-5,5.2,clinicZ-6.08,2,.5,.22,pink);
+  sign(mesh,'MERCY',clinicX-10.58,7,clinicZ,.42,teal);
+  obstacles.push({x:clinicX,z:clinicZ,w:21,d:12,h:9.6});
   return {mesh,obstacles,ramps};
 }
 
@@ -192,6 +200,10 @@ export function clearSpace(city,x,z,radius) {
   if(x-radius<limits.west||x+radius>limits.east||z-radius<limits.north||z+radius>limits.south) return false;
   if(z>331&&(x-radius<-70||x+radius>144)) return false;
   return !city.obstacles.some(b=>Math.abs(b.x-x)<b.w/2+radius&&Math.abs(b.z-z)<b.d/2+radius);
+}
+
+export function blocksAt(city,x,y,z,radius) {
+  return y<radius||city.obstacles.some(box=>y<box.h+radius&&Math.abs(box.x-x)<box.w/2+radius&&Math.abs(box.z-z)<box.d/2+radius);
 }
 
 export function districtAt(x,z) {

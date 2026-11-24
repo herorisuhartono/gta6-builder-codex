@@ -2,22 +2,23 @@ const vertex = `
 attribute vec3 position;
 attribute vec3 pigment;
 uniform vec3 eye, right, up, forward;
-uniform float aspect;
+uniform float aspect, lens;
 varying vec3 color;
 varying float depth;
 void main() {
   vec3 q=position-eye;
   float z=dot(q,forward);
-  gl_Position=vec4(dot(q,right)*1.48/aspect,dot(q,up)*1.48,z*1.00022-.16,z);
+  gl_Position=vec4(dot(q,right)*lens/aspect,dot(q,up)*lens,z*1.00022-.16,z);
   color=pigment;
   depth=z;
 }`;
 const fragment = `
 precision mediump float;
+uniform float opacity;
 varying vec3 color;
 varying float depth;
 void main() {
-  gl_FragColor=vec4(mix(color,vec3(.79,.48,.55),smoothstep(65.,550.,depth)*.76),1.);
+  gl_FragColor=vec4(mix(color,vec3(.79,.48,.55),smoothstep(65.,550.,depth)*.76),opacity);
 }`;
 const cross = ([a,b,c],[x,y,z]) => [b*z-c*y,c*x-a*z,a*y-b*x];
 const normalized = (v) => {
@@ -41,7 +42,7 @@ export function createRenderer(canvas, world) {
   gl.useProgram(program);
   const position = gl.getAttribLocation(program,'position');
   const pigment = gl.getAttribLocation(program,'pigment');
-  const uniforms = Object.fromEntries(['eye','right','up','forward','aspect'].map(name => [name,gl.getUniformLocation(program,name)]));
+  const uniforms = Object.fromEntries(['eye','right','up','forward','aspect','lens','opacity'].map(name => [name,gl.getUniformLocation(program,name)]));
   const stationary = gl.createBuffer();
   const moving = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER,stationary);
@@ -75,9 +76,21 @@ export function createRenderer(canvas, world) {
     gl.uniform3fv(uniforms.up,up);
     gl.uniform3fv(uniforms.forward,forward);
     gl.uniform1f(uniforms.aspect,width/Math.max(1,height));
+    gl.uniform1f(uniforms.lens,1/Math.tan((camera.fov||65)*Math.PI/360));
+    gl.uniform1f(uniforms.opacity,1);
     draw(stationary,world.data.length);
     gl.bindBuffer(gl.ARRAY_BUFFER,moving);
     gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(dynamic.data),gl.STREAM_DRAW);
     draw(moving,dynamic.data.length);
+    if(dynamic.beam?.data.length){
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+      gl.depthMask(false);
+      gl.uniform1f(uniforms.opacity,.15);
+      gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(dynamic.beam.data),gl.STREAM_DRAW);
+      draw(moving,dynamic.beam.data.length);
+      gl.depthMask(true);
+      gl.disable(gl.BLEND);
+    }
   };
 }

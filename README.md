@@ -14,10 +14,15 @@ Run `node serve.ts` with Node 22.18 or later, then open http://localhost:8080 in
 | Shift | Sprint | Nitro |
 | Space | Jump | Handbrake and drift |
 | E or F | Enter nearby car | Exit at low speed |
-| Mouse or left/right arrows | Turn camera and aim | Chase camera follows car |
-| Click | Capture mouse, then fire a stun pulse | Capture mouse |
+| Mouse or left/right arrows | Orbit camera | Free-look with automatic recentering |
+| Right mouse button | Aim over the right shoulder | Free-look |
+| 1 / 2 | Select pistol or Micro-SMG | Select weapon |
+| V |  | Cycle close, far, and hood cameras |
+| Left mouse button | Fire the equipped weapon | Capture mouse |
 | Escape | Pause | Pause |
 
 Follow the amber radar dot to the promenade, the docks, the radio station, and the boulevard race. A cyan gate guides the active race. Keep clear of patrols to lose stars. The Osprey unlocks at $500 and the Kestrel GT at $1,100. Parked faster cars are available on Canary Boulevard.
+
+At one star, foot officers join the patrol cars. At three stars an air unit searches with a spotlight and fires bursts after sustained exposure. Officers drop cash, ammunition, and health. If you are wasted, you wake up outside Mercy Hospital.
 
 The world, vehicles, art, and sounds are generated in code. Source is MIT licensed. `node main.ts` uses the official Make.fun dossier builder. Set `MAKEFUN_OUTPUT_DIR` when running it outside the competition grader.
